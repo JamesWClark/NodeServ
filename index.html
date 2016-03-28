@@ -8,10 +8,22 @@
         <div>Current connections: <span id="current"></span></div>
         <div>Total connections: <span id="total"></span></div>
         
+        <input id="txtMessage"/>
+        <button id="btnSend">Send Message</button>
+        <button id="btnPing">Ping</button><span>Pongs received: </span><span id="pong">0</span>
+        <div>Messages sent by other users:</div>
+        <div id="received_messages"></div>
+        
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.5/socket.io.min.js"></script>
         <script>
-            var socket = io.connect('http://192.168.1.7:3000');
+            var socket = io.connect('http://127.0.0.1:3000');
+            var numPongs = 0;
+                        
+            /* INBOUND */
+            socket.on('connect_error', function() {
+                $('#message').text('Failed to connect. Is Node online?');
+            });
             socket.on('message', function(data) {
                 $('#message').text(data.text);
             });
@@ -19,6 +31,28 @@
                 $('#current').text(data.current);
                 $('#total').text(data.total);
             });
+            socket.on('message_response', function(data) {
+                $('#received_messages').append('<div>' + data.text + '</div>');
+            });
+            socket.on('ping', function(data) {
+                //ping and pong are funny ones - internals i think; don't mess, 
+                //or do mess, but try ping and pingg at the same time -bug?
+                $('#message').text('ping received');
+            });
+            socket.on('ponj', function() {
+                numPongs++;
+                $('#pong').text(numPongs);
+            });
+            
+            /* OUTBOUND */
+            $('#btnSend').click(function() {
+                var txt = $('#txtMessage').val();
+                socket.emit('message', { text: txt });
+            });
+            $('#btnPing').click(function() {
+                socket.emit('pinj', { text: 'PING'});
+            });
+            
         </script>
     </body>
 </html>
