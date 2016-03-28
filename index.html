@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>NodeServ</title>
+    </head>
+    <body>
+        <div id="message"></div>
+        <div>Current connections: <span id="current"></span></div>
+        <div>Total connections: <span id="total"></span></div>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.5/socket.io.min.js"></script>
+        <script>
+            var socket = io.connect('http://192.168.1.7:3000');
+            socket.on('message', function(data) {
+                $('#message').text(data.text);
+            });
+            socket.on('users', function(data) {
+                $('#current').text(data.current);
+                $('#total').text(data.total);
+            });
+        </script>
+    </body>
+</html>
