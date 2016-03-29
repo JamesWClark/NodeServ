@@ -2,6 +2,7 @@ var http = require('http');
 var fs = require('fs');
 var currentConnections = 0; // num connected users
 var totalConnections = 0;
+var nicknames = [];
 
 // the server
 var server = http.createServer(function (req,res) {
@@ -21,31 +22,51 @@ io.sockets.on('connection', function(socket) {
     totalConnections++;
     
     console.log(currentConnections + ': user connected');
+    io.sockets.emit('nicknames', nicknames);
     
     /* OUTBOUND */
     
+    socket.emit('welcome', { text: 'OH HAI'});
     socket.emit('message', { text: 'You have connected'});
     socket.emit('users', { current: currentConnections, total: totalConnections });
     
     socket.broadcast.emit('users', { current: currentConnections, total: totalConnections });
     
     /* INBOUND */
+    socket.on('nickname', function(data, callback) {
+        if(nicknames.indexOf(data) != -1) {
+            callback(false);
+        } else {
+            callback(true);
+            nicknames.push(data);
+            socket.nickname = data;
+            console.log(nicknames);
+            io.sockets.emit('nicknames', nicknames);
+        }        
+    });
     socket.on('pinj', function() {
         console.log('received PING. sending PONG');
         socket.emit('ponj', { text: 'PONG'});
     });
     
-    /* this will receive a message from one user, log it on the server, and
-     * broadcast it to the rest of the currently connected users
-     */ 
     socket.on('message', function(data) {
         console.log('message received: ' + data.text);
         socket.broadcast.emit('message_response', data);
+        /* this will receive a message from one user, log it on the server, and
+         * broadcast it to the rest of the currently connected users
+         */
     });
     
     socket.on('disconnect', function() {
         currentConnections--;
         console.log(currentConnections + ': user disconnected');
         socket.broadcast.emit('users', { current: currentConnections, total: totalConnections });
+        if(!socket.nickname) {
+            return;
+        }
+        if(nicknames.indexOf(socket.nickname) > -1) {
+            nicknames.splice(nicknames.indexOf(socket.nickname), 1);
+            console.log(nicknames);
+        }
     });
 });

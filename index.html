@@ -7,10 +7,17 @@
         <div id="message"></div>
         <div>Current connections: <span id="current"></span></div>
         <div>Total connections: <span id="total"></span></div>
-        
-        <input id="txtMessage"/>
-        <button id="btnSend">Send Message</button>
+        <div>
+            <input placeholder="Nickname" id="nickname"/>
+            <button id="btnNickname">Send Nickname</button>
+            <span id="nickname-result"></span>
+        </div>
+        <div>
+            <input placeholder="Message" id="txtMessage"/>
+            <button id="btnSend">Send Message</button>
+        </div>
         <button id="btnPing">Ping</button><span>Pongs received: </span><span id="pong">0</span>
+        <div>Nicknames: <span id="nicknames-list"></span></div>
         <div>Messages sent by other users:</div>
         <div id="received_messages"></div>
         
@@ -19,10 +26,25 @@
         <script>
             var socket = io.connect('http://127.0.0.1:3000');
             var numPongs = 0;
+            var nickname = '';
+            var nicknamesList = $('#nicknames-list');
                         
-            /* INBOUND */
+            /* ERROR HANDLING */
+            
             socket.on('connect_error', function() {
                 $('#message').text('Failed to connect. Is Node online?');
+            });
+                        
+            /* INBOUND */
+            socket.on('nicknames', function(data) {
+                var html = '';
+                for(var i = 0; i < data.length; i++) {
+                    html += data[i] + ' / ';
+                }
+                nicknamesList.empty().append(html);
+            });
+            socket.on('welcome', function(data) {
+                console.log(data.text);
             });
             socket.on('message', function(data) {
                 $('#message').text(data.text);
@@ -37,7 +59,7 @@
             socket.on('ping', function(data) {
                 //ping and pong are funny ones - internals i think; don't mess, 
                 //or do mess, but try ping and pingg at the same time -bug?
-                $('#message').text('ping received');
+                console.log('ping received');
             });
             socket.on('ponj', function() {
                 numPongs++;
@@ -45,6 +67,7 @@
             });
             
             /* OUTBOUND */
+            
             $('#btnSend').click(function() {
                 var txt = $('#txtMessage').val();
                 socket.emit('message', { text: txt });
@@ -52,6 +75,23 @@
             $('#btnPing').click(function() {
                 socket.emit('pinj', { text: 'PING'});
             });
+            $('#btnNickname').click(function() {
+                socket.emit('nickname', nickname, function(data) {
+                    if(data) {
+                        $('#nickname-result').text('Nickname set successfully.');
+                    } else {
+                        $('#nickname-result').text('Nickname already taken.');
+                    }
+                });
+            });
+            
+            /* EVENTS */
+            
+            $('#nickname').on('input', function() {
+                nickname = $(this).val();
+            });
+            
+            //followup: http://stackoverflow.com/questions/11484418/socket-io-broadcast-to-certain-users
             
         </script>
     </body>
