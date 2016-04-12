@@ -1,0 +1,26 @@
+/*div {
+  border: solid black 5px;
+  margin: 5px;
+  padding: 5px;
+}*/
+
+.flex {
+  display: flex;
+}
+
+.x1 {
+  flex: 1;
+}
+
+.wrap {
+  flex-wrap: wrap;
+}
+
+.right {
+  justify-content: flex-end;
+  text-align: right;
+}
+
+#activate {
+  display: none;
+}

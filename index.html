@@ -1,98 +1,37 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>NodeServ</title>
-    </head>
-    <body>
-        <div id="message"></div>
-        <div>Current connections: <span id="current"></span></div>
-        <div>Total connections: <span id="total"></span></div>
-        <div>
-            <input placeholder="Nickname" id="nickname"/>
-            <button id="btnNickname">Send Nickname</button>
-            <span id="nickname-result"></span>
+
+<head>
+  <title>NodeServ</title>
+  <meta name="google-signin-client_id" content="342876179484-j1svlvjorpa0bptu960gj208psn9r71t.apps.googleusercontent.com">
+  <link href="main.css" rel="stylesheet"/>
+</head>
+
+<body>
+
+  <div id="signin" class="g-signin2" data-onsuccess="onSignIn"></div>
+  <div id="activate">
+    <div class="flex" id="usernav">
+      <div class="x1 flex">
+        <div class="x1" id="userimage">userimage</div>
+        <div class="x1">
+          <div class="block" id="username">username</div>
+          <div class="block" id="useremail">useremail</div>
+          <div class="block" id="userid">userid</div>
         </div>
-        <div>
-            <input placeholder="Message" id="txtMessage"/>
-            <button id="btnSend">Send Message</button>
-        </div>
-        <button id="btnPing">Ping</button><span>Pongs received: </span><span id="pong">0</span>
-        <div>Nicknames: <span id="nicknames-list"></span></div>
-        <div>Messages sent by other users:</div>
-        <div id="received_messages"></div>
-        
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.5/socket.io.min.js"></script>
-        <script>
-            var socket = io.connect('http://127.0.0.1:3000');
-            var numPongs = 0;
-            var nickname = '';
-            var nicknamesList = $('#nicknames-list');
-                        
-            /* ERROR HANDLING */
-            
-            socket.on('connect_error', function() {
-                $('#message').text('Failed to connect. Is Node online?');
-            });
-                        
-            /* INBOUND */
-            socket.on('nicknames', function(data) {
-                var html = '';
-                for(var i = 0; i < data.length; i++) {
-                    html += data[i] + ' / ';
-                }
-                nicknamesList.empty().append(html);
-            });
-            socket.on('welcome', function(data) {
-                console.log(data.text);
-            });
-            socket.on('message', function(data) {
-                $('#message').text(data.text);
-            });
-            socket.on('users', function(data) {
-                $('#current').text(data.current);
-                $('#total').text(data.total);
-            });
-            socket.on('message_response', function(data) {
-                $('#received_messages').append('<div>' + data.text + '</div>');
-            });
-            socket.on('ping', function(data) {
-                //ping and pong are funny ones - internals i think; don't mess, 
-                //or do mess, but try ping and pingg at the same time -bug?
-                console.log('ping received');
-            });
-            socket.on('ponj', function() {
-                numPongs++;
-                $('#pong').text(numPongs);
-            });
-            
-            /* OUTBOUND */
-            
-            $('#btnSend').click(function() {
-                var txt = $('#txtMessage').val();
-                socket.emit('message', { text: txt });
-            });
-            $('#btnPing').click(function() {
-                socket.emit('pinj', { text: 'PING'});
-            });
-            $('#btnNickname').click(function() {
-                socket.emit('nickname', nickname, function(data) {
-                    if(data) {
-                        $('#nickname-result').text('Nickname set successfully.');
-                    } else {
-                        $('#nickname-result').text('Nickname already taken.');
-                    }
-                });
-            });
-            
-            /* EVENTS */
-            
-            $('#nickname').on('input', function() {
-                nickname = $(this).val();
-            });
-            
-            //followup: http://stackoverflow.com/questions/11484418/socket-io-broadcast-to-certain-users
-            
-        </script>
-    </body>
+      </div>
+      <div class="x1"></div>
+      <div class="x1 right">
+        <button onclick="signOut(); return false;">Sign out</button>
+      </div>
+    </div>
+  </div>
+  <div id="usersonline" class="flex wrap"></div>
+
+  <script src="https://apis.google.com/js/platform.js" async defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.5/socket.io.min.js"></script>
+  <script src="client.js"></script>
+</body>
+
 </html>

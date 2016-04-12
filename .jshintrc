@@ -1,5 +1,9 @@
 {
-    "globals" : {
-        "require" : false
-    }
+  "globals" : {
+    "$" : false,    
+    "document" : false,
+    "gapi" : false,
+    "jQuery" : false,
+    "require" : false    
+  }
 }

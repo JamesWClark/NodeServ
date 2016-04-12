@@ -1,72 +1,37 @@
 var http = require('http');
 var fs = require('fs');
-var currentConnections = 0; // num connected users
-var totalConnections = 0;
-var nicknames = [];
 
-// the server
-var server = http.createServer(function (req,res) {
-    fs.readFile('./index.html', function(error, data) {
-        res.writeHead(200, { 'Content-Type' : 'text/html'});
-        res.end(data, 'utf-8');
-    });
-}).listen(3000, "0.0.0.0");
+var users = [];
 
-console.log('Server on http://0.0.0.0:3000/');
+var server = http.createServer(function(req,res) {
+  fs.readFile('./index.html', function(error, data) {
+    res.writeHead(200, {'Content-Type' : 'text/html'});
+    res.end(data, 'utf-8');
+  });
+}).listen(3000, '127.0.0.1');
+console.log('server listening');
 
 var io = require('socket.io').listen(server);
 
-// handles socket connections
 io.sockets.on('connection', function(socket) {
-    currentConnections++;
-    totalConnections++;
-    
-    console.log(currentConnections + ': user connected');
-    io.sockets.emit('nicknames', nicknames);
-    
-    /* OUTBOUND */
-    
-    socket.emit('welcome', { text: 'OH HAI'});
-    socket.emit('message', { text: 'You have connected'});
-    socket.emit('users', { current: currentConnections, total: totalConnections });
-    
-    socket.broadcast.emit('users', { current: currentConnections, total: totalConnections });
-    
-    /* INBOUND */
-    socket.on('nickname', function(data, callback) {
-        if(nicknames.indexOf(data) != -1) {
-            callback(false);
-        } else {
-            callback(true);
-            nicknames.push(data);
-            socket.nickname = data;
-            console.log(nicknames);
-            io.sockets.emit('nicknames', nicknames);
-        }        
-    });
-    socket.on('pinj', function() {
-        console.log('received PING. sending PONG');
-        socket.emit('ponj', { text: 'PONG'});
-    });
-    
-    socket.on('message', function(data) {
-        console.log('message received: ' + data.text);
-        socket.broadcast.emit('message_response', data);
-        /* this will receive a message from one user, log it on the server, and
-         * broadcast it to the rest of the currently connected users
-         */
-    });
-    
-    socket.on('disconnect', function() {
-        currentConnections--;
-        console.log(currentConnections + ': user disconnected');
-        socket.broadcast.emit('users', { current: currentConnections, total: totalConnections });
-        if(!socket.nickname) {
-            return;
-        }
-        if(nicknames.indexOf(socket.nickname) > -1) {
-            nicknames.splice(nicknames.indexOf(socket.nickname), 1);
-            console.log(nicknames);
-        }
-    });
+  console.log('user connected');
+  
+  socket.on('disconnect', function() {
+    console.log('user disconnected');
+    if(!socket.user) {
+      return;
+    }
+    if(users.indexOf(socket.user) > -1) {
+      users.splice(users.indexOf(socket.user), 1);
+    }
+    console.log('users: ' + users.length);
+  });
+  
+  socket.on('user', function(user) {
+    users.push(user);
+    socket.user = user;
+    console.log('users : ' + users.length);
+  });
+  
+  socket.emit('welcome', { text : 'OH HAI! U R CONNECTED '});
 });
