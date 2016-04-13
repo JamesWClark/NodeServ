@@ -14,23 +14,25 @@ console.log('server listening');
 var io = require('socket.io').listen(server);
 
 io.sockets.on('connection', function(socket) {
-  console.log('user connected');
   
   socket.on('disconnect', function() {
-    console.log('user disconnected');
     if(!socket.user) {
       return;
     }
     if(users.indexOf(socket.user) > -1) {
+      console.log(socket.user.id + ' disconnected');
       users.splice(users.indexOf(socket.user), 1);
+      socket.broadcast.emit('otherUserDisconnect', socket.user);
     }
     console.log('users: ' + users.length);
   });
   
   socket.on('user', function(user) {
+    console.log(user.id + ' connected');
     users.push(user);
     socket.user = user;
     console.log('users : ' + users.length);
+    socket.broadcast.emit('otherUserConnect', user);
   });
   
   socket.on('msg', function(msg) {

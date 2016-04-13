@@ -1,8 +1,8 @@
-div {
+/*div {
   border: solid black 5px;
   margin: 5px;
   padding: 5px;
-}
+}*/
 
 .flex {
   display: flex;
@@ -33,6 +33,7 @@ div {
 
 #chat-log {
   padding: 14px;
+  border: solid black 1px;
 }
 
 #chat-input {
