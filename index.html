@@ -11,6 +11,7 @@
 
   <div id="signin" class="g-signin2" data-onsuccess="onSignIn"></div>
   <div id="activate">
+    
     <div class="flex" id="usernav">
       <div class="x1 flex">
         <div class="x1" id="userimage">userimage</div>
@@ -25,8 +26,20 @@
         <button onclick="signOut(); return false;">Sign out</button>
       </div>
     </div>
+    
+    <div id="usersonline" class="flex wrap"></div>
+    
+    <div id="chat-container">
+      <div id="chat-log"></div>
+      <div id="chat-input-container">
+        <input id="chat-input" />
+      </div>
+      <div>
+        <button id="btnSendMessage">Send Message</button>
+      </div>
+    </div>
+    
   </div>
-  <div id="usersonline" class="flex wrap"></div>
 
   <script src="https://apis.google.com/js/platform.js" async defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>

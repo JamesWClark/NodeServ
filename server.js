@@ -33,5 +33,12 @@ io.sockets.on('connection', function(socket) {
     console.log('users : ' + users.length);
   });
   
+  socket.on('msg', function(msg) {
+    io.sockets.emit('msg', {
+      user: socket.user,
+      data: msg
+    });
+  });
+  
   socket.emit('welcome', { text : 'OH HAI! U R CONNECTED '});
 });

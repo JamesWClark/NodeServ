@@ -5,6 +5,10 @@ var socket;
 
 function gogoSockets() {
   socket = io.connect('http://127.0.0.1:3000');
+  
+  socket.on('msg', function(msg) {
+    $('#chat-log').append('<div><strong>' + msg.user.name + '</strong>: ' + msg.data + '</div>');
+  });
 }
 
 function onSignIn(googleUser) {
@@ -23,10 +27,7 @@ function onSignIn(googleUser) {
 function signOut() {
   var auth2 = gapi.auth2.getAuthInstance();
   auth2.signOut().then(function () {
-    user.image = null;
-    user.name = null;
-    user.email = null;
-    user.id = null;
+    user = null;
     toggleCredential();
   });
 }
@@ -47,4 +48,11 @@ function toggleCredential() {
 
 $(document).ready(function() {
   gogoSockets();
+  
+  $('#btnSendMessage').click(function() {
+    var msg = $('#chat-input').val();
+    socket.emit('msg', msg);
+    $('#chat-input').val('');
+  });
+  
 });
