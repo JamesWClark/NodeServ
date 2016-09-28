@@ -76,6 +76,7 @@
                 socket.emit('pinj', { text: 'PING'});
             });
             $('#btnNickname').click(function() {
+                nickname = $('#nickname').val();
                 socket.emit('nickname', nickname, function(data) {
                     if(data) {
                         $('#nickname-result').text('Nickname set successfully.');
@@ -83,12 +84,6 @@
                         $('#nickname-result').text('Nickname already taken.');
                     }
                 });
-            });
-            
-            /* EVENTS */
-            
-            $('#nickname').on('input', function() {
-                nickname = $(this).val();
             });
             
             //followup: http://stackoverflow.com/questions/11484418/socket-io-broadcast-to-certain-users
